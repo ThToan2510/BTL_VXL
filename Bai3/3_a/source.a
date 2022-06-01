@@ -1,0 +1,30 @@
+		ORG 2000H
+Main:	MOV R0, #0
+		MOV R1, #0
+Core:	MOV R6, #50
+Loop:	CALL Output
+		DJNZ R6, Loop
+		INC R0
+		CJNE R0, #0AH, Core
+		MOV R0, #0
+		INC R1
+		CJNE R1, #0AH, Core
+		SJMP Main
+Output:	MOV DPTR, #1000H	 		//2MC
+		MOV A, #0E0H		  		//1MC
+		ADD A, R0				  	//1MC
+		MOVX @DPTR, A			  	//2MC
+		CALL Delay				  	//2MC
+		MOV A, #0D0H			  	//1MC
+		ADD A, R1				  	//1MC
+		MOVX @DPTR, A				//2MC
+		CALL Delay				  	//2MC
+		RET
+Delay:	MOV R2, #2
+Loop1:	MOV R3, #248				// Co hieu chinh
+		DJNZ R3, $
+		DJNZ R2, Loop1
+		RET
+		END
+		
+		
