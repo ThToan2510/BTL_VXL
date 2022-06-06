@@ -4,14 +4,11 @@
 				MOV SCON, #50H
 				MOV PCON, #80H
 				SETB TR1
-				MOV DPTR, #MESS
-				MOV R0, #0
-		LOOP:	MOV A, R0
-				MOVC A, @A+DPTR
-				CJNE A, #0, NEXT
-				SJMP STOP		
-		NEXT:	ACALL XUAT
-				INC R0
+		LOOP:	ACALL NHAN		
+				MOV DPTR, #6000H
+				ACALL INIT_LCD
+				MOVX @DPTR, A
+				ACALL LCDDATA
 				SJMP LOOP
 		XUAT:	MOV SBUF, A
 				JNB TI, $
@@ -19,4 +16,43 @@
 				RET
 		STOP:	NOP
 		MESS: DB "THINH TOAN TRUYEN" ,0
+NHAN:	JNB RI, $
+		CLR RI
+		MOV A, SBUF
+		RET
+
+;------------------WAIT FOR LCD-----------------
+WAIT_LCD: MOV R4, #10
+LOOPDL1:  MOV R3, #250
+		DJNZ R3, $
+		DJNZ R4, LOOPDL1
+		RET
+;----------------END FUNCTION------------------
+;----------------WRITE DATA TO LCD-------------
+LCDDATA:MOV DPTR, #6000H 
+		MOVX @DPTR, A
+		SETB P3.5
+		SETB P3.4
+		CALL WAIT_LCD
+		CLR P3.4
+		RET
+;---------------END FUNCTION ------------------
+		LCDCOM:	MOV DPTR, #6000H
+		MOVX @DPTR, A
+		CLR P3.5
+		SETB P3.4
+		CALL WAIT_LCD
+		CLR P3.4
+		RET
+;---------------END FUNCTION-------------------
+INIT_LCD: MOV A, #0CH
+		CALL LCDCOM
+		MOV A, #06H
+		CALL LCDCOM
+		MOV A, #38H
+		CALL LCDCOM
+		RET
+CLEAR:	MOV A, #01H
+		CALL LCDCOM
+		RET
 				END
