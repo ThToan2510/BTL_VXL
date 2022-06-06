@@ -1,0 +1,22 @@
+				ORG 2000H
+				MOV TMOD, #20H
+				MOV TH1, #-3
+				MOV SCON, #50H
+				MOV PCON, #80H
+				SETB TR1
+				MOV DPTR, #MESS
+				MOV R0, #0
+		LOOP:	MOV A, R0
+				MOVC A, @A+DPTR
+				CJNE A, #0, NEXT
+				SJMP STOP		
+		NEXT:	ACALL XUAT
+				INC R0
+				SJMP LOOP
+		XUAT:	MOV SBUF, A
+				JNB TI, $
+				CLR TI
+				RET
+		STOP:	NOP
+		MESS: DB "THINH TOAN TRUYEN" ,0
+				END
