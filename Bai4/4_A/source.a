@@ -1,0 +1,97 @@
+; Bai so 4
+		ORG 0000H
+		CALL MAIN
+		ORG 001BH
+		CLR TR1
+		MOV TH1, #HIGH(-49997)
+		MOV TL1, #LOW(-49997)
+		SETB TR1
+		MOV A, R2
+		CALL TACHSO
+		MOV A, R6
+		CALL LCDDATA
+		MOV A, R5
+		CALL LCDDATA
+		MOV A, #'H'
+		CALL LCDDATA
+		MOV A, R1
+		CALL TACHSO
+		MOV A, R6
+		CALL LCDDATA
+		MOV A, R5
+		CALL LCDDATA
+		MOV A, #'M'
+		CALL LCDDATA
+		MOV A, R0
+		CALL TACHSO
+		MOV A, R6
+		CALL LCDDATA
+		MOV A, R5
+		CALL LCDDATA
+		MOV A, #'S'
+		CALL LCDDATA
+		RETI
+
+		ORG 2000H
+MAIN:	MOV R7, #-1		   			// 0.5s
+		MOV IE, #10001000B
+		MOV TMOD, #00010000B
+		MOV DPTR, #7000H
+		SETB TF1
+CORE:	MOV IE, #10001000B
+		INC R7
+		CJNE R7, #2, LOOP
+		MOV R7, #0
+		INC R0
+		CJNE R0, #60, LOOP
+		MOV R0, #0
+		INC R1
+		CJNE R1, #60, LOOP
+		MOV R1, #0
+		INC R2
+		CJNE R2, #24, LOOP
+		MOV R2, #0
+LOOP:	SJMP LOOP
+		SJMP CORE	
+;------------------WAIT FOR LCD-----------------
+WAIT_LCD: MOV R4, #10
+LOOPDL1:  MOV R3, #250
+		DJNZ R3, $
+		DJNZ R4, LOOPDL1
+		RET
+;----------------END FUNCTION------------------
+;----------------WRITE DATA TO LCD-------------
+LCDDATA: MOVX @DPTR, A
+		SETB P3.5
+		SETB P3.4
+		CALL WAIT_LCD
+		CLR P3.4
+		RET
+;---------------END FUNCTION ------------------
+;---------------WRITE COMMAND TRO LCD----------
+LCDCOM:	MOVX @DPTR, A
+		CLR P3.5
+		SETB P3.4
+		CALL WAIT_LCD
+		CLR P3.4
+		RET
+;---------------END FUNCTION-------------------
+INIT_LCD: MOV A, #0CH
+		CALL LCDCOM
+		MOV A, #06H
+		CALL LCDCOM
+		MOV A, #38H
+		CALL LCDCOM
+		RET
+CLEAR:	MOV A, #01H
+		CALL LCDCOM
+		RET
+TACHSO:	MOV B, #10
+		MUL AB
+		ADD A, #30H
+		MOV R6, A
+		MOV A, B
+		ADD A, #30H
+		MOV R5, A
+		RET
+		END
