@@ -1,4 +1,4 @@
-; Bai so 4
+; Bai so 5
 				ORG 0000H
 				LJMP MAIN
 				ORG 001BH
