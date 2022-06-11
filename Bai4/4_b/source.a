@@ -1,0 +1,218 @@
+				ORG 2000H
+				CALL INITLCD
+START_:			MOV DPTR, #5000H	 		;COMMAND THIS LINE IF YOU WANT DEBUG BY PROTEUS
+				MOVX @DPTR, A				;COMMAND THIS LINE IF YOU WANT DEBUG BY PROTEUS
+				MOVX A, @DPTR				;COMMAND THIS LINE IF YOU WANT DEBUG BY PROTEUS
+				;MOV A, #100		; TO DEBUG CODE USING PROTEUS, INIT VALUE FOR MASS NOT USING ADC8080
+				MOV P1, A 		; TO DEBUG MASS
+				MOV R0, A		; STORE MASS TO R0
+				CJNE A, #10, $+3
+				JNC NEXT1
+				MOV R1, #0
+				SJMP EXIT
+NEXT1:			CJNE A, #12, $+3
+				JNC NEXT2
+				MOV R1, #1
+				SJMP EXIT
+NEXT2:			CJNE A, #15, $+3
+				JNC NEXT3
+				MOV R1, #2
+				SJMP EXIT
+NEXT3:			CJNE A, #18, $+3
+				JNC NEXT4
+				MOV R1, #3
+				SJMP EXIT
+NEXT4:			CJNE A, #22, $+3
+				JNC NEXT5
+				MOV R1, #4
+				SJMP EXIT
+NEXT5:			MOV R1, #5
+EXIT:			CALL LCD_OUTPUT
+				JB P1.3, $	 			;WAIT P1.3
+				CALL DISPLAY_UART
+				SJMP $
+;=======================OUTPUT DISPLAY DESKTOP===================================
+DISPLAY_UART:	MOV TMOD, #00100000B
+				MOV TH1, #-3
+				SETB TR1
+				MOV SCON, #01010000B
+				MOV A, PCON
+				ORL A, #10000000B		;SETB SMOD
+				MOV PCON, A
+				CALL STRING_UART1
+				MOV A, R0
+				CALL TACHSO
+				MOV A, R2
+				CALL TRANSMIT 
+				MOV A, R3
+				CALL TRANSMIT
+				MOV A, #'.'
+				CALL TRANSMIT
+				MOV A, R4
+				CALL TRANSMIT
+				MOV A, #'K'
+				CALL TRANSMIT
+				MOV A, #'G'
+				CALL TRANSMIT
+				MOV A, #0H						;/0 BREAK LINE 
+				CALL TRANSMIT
+				CALL STRING_UART2
+				MOV DPTR, #CODE_MASS
+				MOV A, R1
+				MOVC A, @A+DPTR
+				CALL TACHSO
+				MOV A, R2
+				CALL TRANSMIT
+				MOV A, R3
+				CALL TRANSMIT
+				MOV A, #'.'
+				CALL TRANSMIT
+				MOV A, R4
+				CALL TRANSMIT
+				MOV A, #'U'
+				CALL TRANSMIT
+				MOV A, #'S'
+				CALL TRANSMIT
+				MOV A, #'D'
+				CALL TRANSMIT
+				RET
+;================================================================================
+;=======================OUTPUT DISPLAY LCD=======================================
+LCD_OUTPUT:		MOV A, R0
+				CALL TACHSO
+				CALL STRING1
+				MOV A, R2
+				CALL LCDDATA
+				MOV A, R3
+				CALL LCDDATA
+				MOV A, #'.'
+				CALL LCDDATA
+				MOV A, R4
+				CALL LCDDATA
+				MOV A, #'K'
+				CALL LCDDATA
+				MOV A, #'G'
+				CALL LCDDATA
+				MOV A, #0C0H			;BREAK LINE
+				CALL LCDCOM
+				CALL STRING2
+				MOV DPTR, #CODE_MASS
+				MOV A, R1
+				MOVC A, @A+DPTR
+				CALL TACHSO
+				MOV A, R2
+				CALL LCDDATA
+				MOV A, R3
+				CALL LCDDATA
+				MOV A, #'.'
+				CALL LCDDATA
+				MOV A, R4
+				CALL LCDDATA
+				MOV A, #'U'
+				CALL LCDDATA
+				MOV A, #'S'
+				CALL LCDDATA
+				MOV A, #'D'
+				CALL LCDDATA
+				RET
+CODE_MASS: 		DB 100, 120, 145, 200, 180, 165
+;================================================================================
+;===============================TRANSMIT DATA BY UART============================
+TRANSMIT:		MOV SBUF, A
+				JNB TI, $
+				CLR TI
+				RET
+;================================================================================
+;==============================STRING_TRANSMIT_BY_-UART1=========================
+STRING_UART1:	MOV DPTR, #STRING_LCD
+				MOV R7, #0
+LOOP_STR_UART1:	MOV A, R7
+				MOVC A, @A+DPTR
+				JZ END_STR_UART1
+				CALL TRANSMIT
+				INC R7
+				SJMP LOOP_STR_UART1
+END_STR_UART1:	RET
+;================================================================================
+;==============================STRING_TRANSMIT_BY_-UART2=========================
+STRING_UART2:	MOV DPTR, #STRING_LCD2
+				MOV R7, #0
+LOOP_STR_UART2:	MOV A, R7
+				MOVC A, @A+DPTR
+				JZ END_STR_UART2
+				CALL TRANSMIT
+				INC R7
+				SJMP LOOP_STR_UART2
+END_STR_UART2:	RET
+;================================================================================
+;=======================FUNCTION DELAY TO WAIT LCD===============================								  
+WAITLCD:		MOV R5, #5
+LOOPLCD:		MOV R6, #100
+				DJNZ R6, $
+				DJNZ R5, LOOPLCD
+				RET
+;================================================================================
+;===========================FUNCTION WRITE DATA TO LCD===========================
+LCDDATA:		MOV DPTR, #6000H
+				SETB P3.5
+				MOVX @DPTR, A
+				SETB P3.3
+				CALL WAITLCD
+				CLR P3.3
+				RET
+;================================================================================
+;====================FUNCTION WRITE COMMAND TO LCD===============================
+LCDCOM:			MOV DPTR, #6000H
+				CLR P3.5
+				MOVX @DPTR, A
+				SETB P3.3
+				CALL WAITLCD
+				CLR P3.3
+				RET
+;================================================================================
+;========================STRING LCD1==============================================
+STRING1:		MOV R7, #0
+LOOP_STRINGLCD:	MOV DPTR, #STRING_LCD
+				MOV A, R7
+				MOVC A, @A+DPTR
+				JZ END_STRING
+				CALL LCDDATA
+				INC R7
+				SJMP LOOP_STRINGLCD
+END_STRING:		RET
+STRING_LCD:	 	DB "MASS: ",0
+;================================================================================
+;========================STRING LCD2==============================================
+STRING2:		MOV R7, #0
+LOOP_STRINGLCD2:MOV DPTR, #STRING_LCD2
+				MOV A, R7
+				MOVC A, @A+DPTR
+				JZ END_STRING2
+				CALL LCDDATA
+				INC R7
+				SJMP LOOP_STRINGLCD2
+END_STRING2:	RET
+STRING_LCD2: 	DB "PRICE: ",0
+;================================================================================
+;==========================INIT LCD==============================================
+INITLCD:		MOV A, #0CH
+				CALL LCDCOM
+				MOV A, #38H
+				CALL LCDCOM
+				RET
+;=================================================================================
+TACHSO:			MOV B, #10
+				DIV AB	  	
+				MOV R4, B						;UNITS WITHOUT ENCODE ASCII
+				MOV B, #10
+				DIV AB
+				ADD A, #30H
+				MOV R2, A						;HUNDREDS
+				MOV A, B
+				ADD A, #30H
+				MOV R3, A						;DOZENS
+				MOV A, R4
+				ADD A, #30H
+				MOV R4, A						;UNITS WITH ENCODE
+				RET
+				END
