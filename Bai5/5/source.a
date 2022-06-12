@@ -1,0 +1,159 @@
+				ORG 0000H
+				CALL INITLCD
+				MOV P0, #0FFH
+				MOV P3, #00H
+START_:			SETB P3.0
+				CALL DELAY_TIME
+				CLR P3.0
+				CALL DELAY_TIME
+				SETB P3.2			;ADC OUTPUT ENABLE
+				CALL DELAY_TIME2
+				CALL DELAY_TIME2
+				CALL DELAY_TIME2		
+				MOV A, P0	
+				MOV R0, A		; STORE MASS TO R0
+				CJNE A, #10, $+3
+				JNC NEXT1
+				MOV R1, #0
+				SJMP EXIT
+NEXT1:			CJNE A, #12, $+3
+				JNC NEXT2
+				MOV R1, #1
+				SJMP EXIT
+NEXT2:			CJNE A, #15, $+3
+				JNC NEXT3
+				MOV R1, #2
+				SJMP EXIT
+NEXT3:			CJNE A, #18, $+3
+				JNC NEXT4
+				MOV R1, #3
+				SJMP EXIT
+NEXT4:			CJNE A, #22, $+3
+				JNC NEXT5
+				MOV R1, #4
+				SJMP EXIT
+NEXT5:			MOV R1, #5
+EXIT:			
+				CALL LCD_OUTPUT
+				SJMP $
+;=======================OUTPUT DISPLAY LCD=======================================
+LCD_OUTPUT:		MOV A, R0
+				CALL TACHSO
+				CALL STRING1
+				MOV A, R2
+				CALL LCDDATA
+				MOV A, R3
+				CALL LCDDATA
+				MOV A, #'.'
+				CALL LCDDATA
+				MOV A, R4
+				CALL LCDDATA
+				MOV A, #'K'
+				CALL LCDDATA
+				MOV A, #'G'
+				CALL LCDDATA
+				MOV A, #0C0H			;BREAK LINE
+				CALL LCDCOM
+				CALL STRING2
+				MOV DPTR, #CODE_MASS
+				MOV A, R1
+				MOVC A, @A+DPTR
+				CALL TACHSO
+				MOV A, R2
+				CALL LCDDATA
+				MOV A, R3
+				CALL LCDDATA
+				MOV A, #'.'
+				CALL LCDDATA
+				MOV A, R4
+				CALL LCDDATA
+				MOV A, #'U'
+				CALL LCDDATA
+				MOV A, #'S'
+				CALL LCDDATA
+				MOV A, #'D'
+				CALL LCDDATA
+				RET
+CODE_MASS: 		DB 100, 120, 145, 200, 180, 165
+;================================================================================
+;=========================DELAY_TIME=============================================
+DELAY_TIME2:	MOV R5, #100
+LOOP_DELAY2:	MOV R6, #250
+				DJNZ R6, $
+				DJNZ R5, LOOP_DELAY2
+				RET
+;================================================================================
+;=========================DELAY_TIME=============================================
+DELAY_TIME:		MOV R6, #200
+				DJNZ R6, $
+				RET
+;================================================================================
+;=======================FUNCTION DELAY TO WAIT LCD===============================								  
+WAITLCD:		MOV R5, #5
+LOOPLCD:		MOV R6, #100
+				DJNZ R6, $
+				DJNZ R5, LOOPLCD
+				RET
+;================================================================================
+;===========================FUNCTION WRITE DATA TO LCD===========================
+LCDDATA:		SETB P3.5
+				MOV P1, A
+				SETB P3.3
+				CALL WAITLCD
+				CLR P3.3
+				RET
+;================================================================================
+;====================FUNCTION WRITE COMMAND TO LCD===============================
+LCDCOM:			CLR P3.5
+				MOV P1, A
+				SETB P3.3
+				CALL WAITLCD
+				CLR P3.3
+				RET
+;================================================================================
+;========================STRING LCD1=============================================
+STRING1:		MOV R7, #0
+LOOP_STRINGLCD:	MOV DPTR, #STRING_LCD
+				MOV A, R7
+				MOVC A, @A+DPTR
+				JZ END_STRING
+				CALL LCDDATA
+				INC R7
+				SJMP LOOP_STRINGLCD
+END_STRING:		RET
+STRING_LCD:	 	DB "MASS: ",0
+;================================================================================
+;========================STRING LCD2=============================================
+STRING2:		MOV R7, #0
+LOOP_STRINGLCD2:MOV DPTR, #STRING_LCD2
+				MOV A, R7
+				MOVC A, @A+DPTR
+				JZ END_STRING2
+				CALL LCDDATA
+				INC R7
+				SJMP LOOP_STRINGLCD2
+END_STRING2:	RET
+STRING_LCD2: 	DB "PRICE: ",0
+;================================================================================
+;==========================INIT LCD==============================================
+INITLCD:		MOV A, #0CH
+				CALL LCDCOM
+				MOV A, #38H
+				CALL LCDCOM
+				RET
+;=================================================================================
+TACHSO:			MOV B, #10
+				DIV AB	  	
+				MOV R4, B						;UNITS WITHOUT ENCODE ASCII
+				MOV B, #10
+				DIV AB
+				ADD A, #30H
+				MOV R2, A						;HUNDREDS
+				MOV A, B
+				ADD A, #30H
+				MOV R3, A						;DOZENS
+				MOV A, R4
+				ADD A, #30H
+				MOV R4, A						;UNITS WITH ENCODE
+				RET
+				END
