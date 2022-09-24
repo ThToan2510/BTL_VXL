@@ -1,0 +1,28 @@
+báo cáo giải pháp xữ lý nước thải hoạt tự động 
+1. Những khó khăn đối với hệ thống xữ lý nước thải sinh hoạt truyền thống:
+	- Xữ dụng nhiều năng lượng
+	- Chiếm nhiều diện tích 
+	- Chất thải sinh hoạt có tính chất phức tạp và biến đổi liên tục đòi hỏi người điều hành phải liên tục đo đặt
+	- Đòi hỏi người vận hành có kiến thức về chất lượng nước và hệ thống xữ lý nước thải
+	- cần đội ngủ trực vận hành hệ thống xữ lý
+2. Những tiến bộ của hệ thống xữ lý nước thải sinh hoạt tự động:
+	- Tiện lợi, hữu ít với khu vực nhỏ.
+	- sử dụng nguồn năng lượng sạch, không tốn quá nhiều năng lượng khi vận hành
+	- Hệ thống kiểm soát nguồn nước liên tục nhờ hệ thống máy tính và giao tiếp đám mây giúp việc giám sát liên tục hệ thống xữ lý nước thải
+	- Đòi hỏi ít nhân lực hoặc là hoàn toàn tự động 
+	- Dược quản lý bởi máy tính và trí tuệ nhân tạo giúp thích ứng với đặc tính của nước thải cần xữ lý giúp tiết kiệm nguồn lực hóa chất sử dụng.
+3. Nguyên lý hoạt động cơ bản:
+	B1: Hệ thống cảm biến liên tục đo các thông số của nước thải cần sử lý ( độ pH, nồng độ chất rắn lơ lững, hàm lượng kim loại nặng,...)
+	B2: Hệ thống vi xữ lý tiếp nhận số liệu, tổng hợp số liệu và gữi lên đám mây.
+	B3: Hệ thống backend tiếp nhận dữ liệu, lưu trữ tạo thành cơ sở dữ liệu cho máy học thích ứng, dự đoán sau này.
+	B4: Hệ thống backend thực hiện thuật toán máy học ( AI ) đề xuất cách xữ lý phù hợp nhất. 
+	B5: Hệ thống backend trả lại phương pháp xữ lý nước thải phù hợp nhất (hóa chất sử dụng, nồng độ, liều lượng,...)
+	B6: Vi xữ lý tiếp nhận phương pháp xữ lý nước từ backend, gữi đến fontend cho người kiểm soát kiểm tra và ra quyết định.
+	B7: cảm biến đo lượng hóa chất còn lại của hệ thống, nếu hết hóa chất cần dùng sẽ gữi tín hiệu cho người kiếm soát bổ sung thêm.
+	B8: Vi xữ lý dựa vào quyết định của người kiểm soát, đưa tính hiệu đến hệ thống thực thi (cũng cấp hoá chất, nồng độ, liều lượng,...)
+	B9: Sau khí nước thải được xữ lý xong sẽ được cảm biến do đạt lại lần nữa về chất lượng nước sau xữ lý, tổng hợp số liệu và gữi đến backend lưu trữ tạo thành
+cơ sở dữ liệu máy học cho hệ thống hoạt động thích hợp hơn nữa về sau (train cho AI)
+4.Nhược điểm của hệ thống:
+	- Ban đầu phương pháp xữ lý có thể chưa phù hợp lắm vì còn thiếu cơ sở dữ liệu cho hệ thống máy  học.
+	- Hệ thống phức tạp.
+	- Phù hợp hơn với xữ lý nước thải sinh hoạt của tòa nhà, hơn là xữ lý công suất hơn.
